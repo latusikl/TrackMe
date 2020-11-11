@@ -7,11 +7,11 @@ object AppDataCreator {
     private const val EMPTY_STRING = ""
 
     fun createAppDataWithId(newUuid : String) : AppData {
-        return AppData(newUuid, EMPTY_STRING, EMPTY_STRING )
+        return AppData(newUuid, EMPTY_STRING, EMPTY_STRING, 0 )
     }
 
-    fun createAppDataWithServerInfo(ip : String, port : String, appData: AppData) : AppData{
-        return AppData(appData.deviceId,ip,port)
+    fun createAppDataWithServerInfo(ip : String, port : String, interval : Int ,appData: AppData) : AppData{
+        return AppData(appData.deviceId,ip,port, interval)
     }
 
 }

@@ -18,4 +18,17 @@
     <string name="welcomeText">Welcome!</string>
     <string name="about_generated_device_id">GENERATED DEVICE ID</string>
     <string name="about_info_location">We need to access to Your location to send it to our server. Otherwise our app will not work properly.</string>
+    <string name="settings_title">Setup server data</string>
+    <string name="settingsIpLabel">Server IP address:</string>
+    <string name="serverPortLabel">Server port number</string>
+    <string name="settings_interval_label">Sending interval</string>
+
+    <string-array name="intervalValues">
+        <item>1 min</item>
+        <item>0.5 min</item>
+        <item>2 min</item>
+        <item>3 min</item>
+        <item>4 min</item>
+        <item>5 min</item>
+    </string-array>
 </resources>
