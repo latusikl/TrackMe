@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.navigation.fragment.findNavController
 import pl.latusikl.trackme.models.AppData
+import pl.latusikl.trackme.services.AppDataCreator
 import pl.latusikl.trackme.services.FileStore
 import java.util.*
 
@@ -34,7 +35,7 @@ class AboutFragment : Fragment() {
             appData.deviceId
         } else{
             val newDeviceId = UUID.randomUUID().toString()
-            val appData = AppData(newDeviceId,"","")
+            val appData = AppDataCreator.createAppDataWithId(newDeviceId)
             FileStore.writeToFile(appData)
             newDeviceId
         }
