@@ -17,4 +17,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="welcomeText">Welcome!</string>
     <string name="about_generated_device_id">GENERATED DEVICE ID</string>
+    <string name="about_info_location">We need to access to Your location to send it to our server. Otherwise our app will not work properly.</string>
 </resources>
