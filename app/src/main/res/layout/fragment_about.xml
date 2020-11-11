@@ -69,6 +69,7 @@
 
     <TextView
         android:id="@+id/aboutUuidTextView"
+        android:textIsSelectable="true"
         android:layout_width="380dp"
         android:layout_height="35dp"
         android:layout_marginTop="8dp"
