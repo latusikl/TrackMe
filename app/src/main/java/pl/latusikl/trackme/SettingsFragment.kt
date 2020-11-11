@@ -1,7 +1,6 @@
 package pl.latusikl.trackme
 
 import android.os.Bundle
-import android.os.storage.StorageManager
 import android.util.Patterns
 import android.view.Gravity
 import androidx.fragment.app.Fragment
@@ -11,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.*
 import pl.latusikl.trackme.services.AppDataCreator
 import pl.latusikl.trackme.services.FileStore
+import java.util.*
 
 class SettingsFragment : Fragment() {
 
@@ -30,6 +30,7 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         addApplyButtonClickListener(view)
         initiateSpinner(view)
+        loadCurrentData(view)
     }
 
     private fun initiateSpinner(view: View) {
@@ -44,18 +45,19 @@ class SettingsFragment : Fragment() {
         view.findViewById<Button>(R.id.settingsApply).setOnClickListener {
             val ipAddress = getIpAddressInput(view)
             val port = getPortInput(view)
-            val interval: Int = extractIntervalFromString(getIntervalInput(view))
+            val interval: Int = extractIntervalFromStringAsSeconds(getIntervalInput(view))
 
             val isPortValid = isPortInputValid(port)
             val isIpValid = isIpAddressValid(ipAddress)
 
             if (isPortValid && isIpValid) {
-                AppDataCreator.createAppDataWithServerInfo(
+                val modifiedData = AppDataCreator.createAppDataWithServerInfo(
                     ipAddress,
                     port,
                     interval,
                     FileStore.readFromFile()
                 )
+                FileStore.writeToFile(modifiedData)
                 showToast("Settings updated.")
             } else if (!isPortValid && !isIpValid) {
                 showToast("IP address and port are invalid.")
@@ -64,6 +66,25 @@ class SettingsFragment : Fragment() {
             } else {
                 showToast("IP address is invalid.")
             }
+        }
+    }
+
+    private fun loadCurrentData(view: View) {
+        val currentAppData = FileStore.readFromFile()
+        view.findViewById<EditText>(R.id.serverIpInput).setText(currentAppData.ipAddress)
+        view.findViewById<EditText>(R.id.serverPortInput).setText(currentAppData.port)
+        view.findViewById<Spinner>(R.id.intervalSpinner).setSelection(convertSecondsToPosition(currentAppData.sendingIntervalSeconds))
+    }
+
+    private fun convertSecondsToPosition(deviceIntervalSeconds : Int) : Int{
+       return when(deviceIntervalSeconds){
+            60 -> 0
+            30 -> 1
+            120 -> 2
+            180 -> 3
+            240 -> 4
+            300 -> 5
+            else -> 0
         }
     }
 
@@ -88,8 +109,9 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun extractIntervalFromString(intervalInput: String): Int {
-        return intervalInput.substring(0, intervalInput.length - INTERVAL_SUFFIX_LENGTH).toInt()
+    private fun extractIntervalFromStringAsSeconds(intervalInput: String): Int {
+        println((intervalInput.substring(0, intervalInput.length - INTERVAL_SUFFIX_LENGTH).toDouble() * 60).toInt())
+        return (intervalInput.substring(0, intervalInput.length - INTERVAL_SUFFIX_LENGTH).toDouble() * 60).toInt()
     }
 
     private fun isIpAddressValid(ipAddress: String): Boolean {
@@ -98,7 +120,6 @@ class SettingsFragment : Fragment() {
 
     private fun showToast(message: String) {
         val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
-        toast.setGravity(Gravity.TOP, 0, 0)
         toast.show()
     }
 }
