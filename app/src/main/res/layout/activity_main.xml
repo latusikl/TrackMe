@@ -12,6 +12,18 @@
         android:layout_height="50dp"
         android:background="@color/primary"
         android:theme="@style/Theme.TrackMe.AppBarOverlay">
+
+        <TextView
+            android:id="@+id/appNameTextView"
+            android:layout_width="164dp"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/arbutus"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:text="@string/appName"
+            android:textColor="@color/accent"
+            android:textSize="18sp"
+            android:textStyle="bold" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

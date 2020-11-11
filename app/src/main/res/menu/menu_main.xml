@@ -3,21 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="pl.latusikl.trackme.MainActivity">
     <item
-        android:id="@+id/FirstFragment"
+        android:id="@+id/AboutFragment"
         android:enabled="true"
-        android:title="About"
-        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/about_name"
+        android:icon="@drawable/ic_baseline_info_24"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/SecondFragment"
+        android:id="@+id/ConnectFragment"
         android:enabled="true"
-        android:title="Connect"
+        android:title="@string/connect_name"
+        android:icon="@drawable/ic_baseline_gps_fixed_24"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/SettingsFragment"
+        android:enabled="true"
+        android:title="@string/settings_name"
         android:icon="@drawable/ic_baseline_settings_24"
         app:showAsAction="ifRoom" />
-<!--    <item-->
-<!--        android:id="@+id/action_music"-->
-<!--        android:enabled="true"-->
-<!--        android:title="Settings"-->
-<!--        android:icon="@drawable/ic_baseline_settings_24"-->
-<!--        app:showAsAction="ifRoom" />-->
 </menu>

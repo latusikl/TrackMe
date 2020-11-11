@@ -3,26 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/SecondFragment">
+    app:startDestination="@id/ConnectFragment">
 
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="pl.latusikl.trackme.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        android:id="@+id/AboutFragment"
+        android:name="pl.latusikl.trackme.AboutFragment"
+        android:label="@string/about_name"
+        tools:layout="@layout/fragment_about">
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            app:destination="@id/ConnectFragment" />
     </fragment>
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="pl.latusikl.trackme.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
+        android:id="@+id/ConnectFragment"
+        android:name="pl.latusikl.trackme.ConnectFragment"
+        android:label="@string/connect_name"
+        tools:layout="@layout/fragment_connect">
 
         <action
             android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
+            app:destination="@id/AboutFragment" />
     </fragment>
 </navigation>
