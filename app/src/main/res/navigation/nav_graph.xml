@@ -26,6 +26,6 @@
     <fragment
         android:id="@+id/SettingsFragment"
         android:name="pl.latusikl.trackme.SettingsFragment"
-        android:label="fragment_settings"
+        android:label="@string/settings_name"
         tools:layout="@layout/fragment_settings" />
 </navigation>
