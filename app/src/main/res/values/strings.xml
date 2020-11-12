@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">TrackMe</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="previous">Previous</string>
 
 
     <string name="about_info_general">Connect your device to our server application and track your device location.</string>
@@ -14,7 +13,6 @@
     <string name="settings_name">Settings</string>
     <string name="appName">TrackMe</string>ś
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="welcomeText">Welcome!</string>
     <string name="about_generated_device_id">GENERATED DEVICE ID</string>
     <string name="about_info_location">We need to access to Your location to send it to our server. Otherwise our app will not work properly.</string>
@@ -22,6 +20,10 @@
     <string name="settingsIpLabel">Server IP address:</string>
     <string name="serverPortLabel">Server port number</string>
     <string name="settings_interval_label">Sending interval</string>
+    <string name="connect_button">Connect</string>
+    <string name="connect_title">Server connection</string>
+    <string name="current_location_label">Current location</string>
+    <string name="last_send_label">Last location send at</string>
 
     <string-array name="intervalValues">
         <item>1 min</item>

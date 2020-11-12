@@ -7,13 +7,122 @@
     android:background="@color/secondary"
     tools:context=".ConnectFragment">
 
-    <Button
-        android:id="@+id/button_second"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/previous"
+
+    <TextView
+        android:id="@+id/settingsTitle"
+        android:layout_width="227dp"
+        android:layout_height="38dp"
+        android:fontFamily="@font/arbutus"
+        android:text="@string/connect_title"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.086"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.051" />
+
+    <TextView
+        android:id="@+id/current_location_label"
+        android:layout_width="123dp"
+        android:layout_height="22dp"
+        android:layout_marginTop="80dp"
+        android:text="@string/current_location_label"
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.055"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settingsTitle" />
+
+    <TextView
+        android:id="@+id/last_send_time_label"
+        android:layout_width="147dp"
+        android:layout_height="18dp"
+        android:layout_marginTop="80dp"
+        android:text="@string/last_send_label"
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.06"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/current_location_input" />
+
+    <TextView
+        android:id="@+id/connection_status_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:text="Connection status"
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.053"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/last_send_input" />
+
+    <TextView
+        android:id="@+id/current_location_input"
+        android:layout_width="352dp"
+        android:layout_height="29dp"
+        android:background="@drawable/border"
+        android:gravity="center"
+        android:text="50.105997, 18.973760"
+        android:textIsSelectable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.271"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/current_location_label" />
+
+
+    <TextView
+        android:id="@+id/last_send_input"
+        android:layout_width="352dp"
+        android:layout_height="29dp"
+        android:background="@drawable/border"
+        android:gravity="center"
+        android:text="20.10.2019 18:50"
+        android:textIsSelectable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.271"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/last_send_time_label" />
+
+
+    <TextView
+        android:id="@+id/connection_status_input"
+        android:layout_width="352dp"
+        android:layout_height="29dp"
+        android:background="@drawable/border"
+        android:gravity="center"
+        android:text="DISCONNECTED"
+        app:layout_constraintBottom_toTopOf="@+id/connection_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.271"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/connection_status_label"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/connection_button"
+        android:layout_width="237dp"
+        android:layout_height="47dp"
+        android:layout_marginBottom="56dp"
+        android:text="@string/connect_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView6"
+        android:layout_width="91dp"
+        android:layout_height="63dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:src="@drawable/ic_baseline_cloud_queue_24"
+        app:layout_constraintBottom_toTopOf="@+id/current_location_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.044"
+        app:layout_constraintStart_toEndOf="@+id/settingsTitle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.274" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
