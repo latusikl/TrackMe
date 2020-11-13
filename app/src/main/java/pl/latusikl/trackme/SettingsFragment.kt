@@ -2,15 +2,13 @@ package pl.latusikl.trackme
 
 import android.os.Bundle
 import android.util.Patterns
-import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import pl.latusikl.trackme.services.AppDataCreator
-import pl.latusikl.trackme.services.FileStore
-import java.util.*
+import pl.latusikl.trackme.util.AppDataCreator
+import pl.latusikl.trackme.util.FileStore
 
 class SettingsFragment : Fragment() {
 

@@ -5,12 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
-import androidx.navigation.fragment.findNavController
-import pl.latusikl.trackme.models.AppData
-import pl.latusikl.trackme.services.AppDataCreator
-import pl.latusikl.trackme.services.FileStore
+import pl.latusikl.trackme.util.AppDataCreator
+import pl.latusikl.trackme.util.FileStore
 import java.util.*
 
 class AboutFragment : Fragment() {

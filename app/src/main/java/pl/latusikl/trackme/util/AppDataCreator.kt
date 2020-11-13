@@ -1,4 +1,4 @@
-package pl.latusikl.trackme.services
+package pl.latusikl.trackme.util
 
 import pl.latusikl.trackme.models.AppData
 
