@@ -3,7 +3,6 @@ package pl.latusikl.trackme
 import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -20,8 +19,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.snackbar.Snackbar
 import pl.latusikl.trackme.services.LocationForegroundService
 import pl.latusikl.trackme.util.SharedPreferenceUtil
-import pl.latusikl.trackme.util.toText
-
 
 class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
 

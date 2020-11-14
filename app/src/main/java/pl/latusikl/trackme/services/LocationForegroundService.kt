@@ -29,7 +29,8 @@ class LocationForegroundService : Service() {
     private lateinit var notificationManager: NotificationManager
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
-    private lateinit var locationCallback: LocationCallback
+    private var locationCallback: LocationCallback? = null
+    private var serverConnector : ServerConnector? = null
 
     private lateinit var currentLocation: String
 
@@ -38,7 +39,6 @@ class LocationForegroundService : Service() {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         locationRequest = prepareLocationRequest()
-        locationCallback = prepareLocationCallback()
         currentLocation =  getString(R.string.location_unknown)
 
     }
@@ -133,6 +133,7 @@ fun subscribeToLocationUpdates() {
     startService(Intent(applicationContext, LocationForegroundService::class.java))
 
     try {
+        this.locationCallback = prepareLocationCallback()
         fusedLocationProviderClient.requestLocationUpdates(
             locationRequest, locationCallback, Looper.myLooper()
         )
@@ -142,17 +143,22 @@ fun subscribeToLocationUpdates() {
 }
 
 fun unsubscribeToLocationUpdates() {
-    try {
-        val removeTask = fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-        removeTask.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                stopSelf()
+    if (locationCallback != null) {
+        try {
+            val removeTask = fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+            removeTask.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    stopSelf()
+                }
             }
-        }
-        SharedPreferenceUtil.saveLocationTrackingPref(this, false)
+            SharedPreferenceUtil.saveLocationTrackingPref(this, false)
 
-    } catch (exception: SecurityException) {
-        SharedPreferenceUtil.saveLocationTrackingPref(this, true)
+        } catch (exception: SecurityException) {
+            SharedPreferenceUtil.saveLocationTrackingPref(this, true)
+        }
+    }
+    else{
+        SharedPreferenceUtil.saveLocationTrackingPref(this, false)
     }
 }
 
