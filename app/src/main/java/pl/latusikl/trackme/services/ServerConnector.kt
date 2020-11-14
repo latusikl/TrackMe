@@ -21,4 +21,8 @@ class ServerConnector(portNumber: Int, ipAddress: String) : AutoCloseable {
         socket.close()
     }
 
+    fun isConnected() : Boolean{
+        return socket.isConnected && !output.checkError()
+    }
+
 }

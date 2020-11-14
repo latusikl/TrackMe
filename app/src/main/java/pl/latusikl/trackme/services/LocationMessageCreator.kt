@@ -16,7 +16,7 @@ public object LocationMessageCreator{
        return "imei:$deviceId,tracker,${formattedDate(date)},,F,,A,${processDegrees(latitude)},${latitudeDirection(latitude)},${processDegrees(longitude)},${longitudeDirection(longitude)},0,0;"
     }
 
-    fun createNoLocationMessage(deviceId: String, date : Date) = "imei:$deviceId,tracker,0,,L,,A,0,X,0,X,0,0;"
+    fun createNoLocationMessage(deviceId: String, date : Date) = "imei:$deviceId,tracker,${formattedDate(date)},,L,,A,0,X,0,X,0,0;"
 
     private fun formattedDate(date: Date) : String{
         return SimpleDateFormat("yyMMddHHmmss").format(date)

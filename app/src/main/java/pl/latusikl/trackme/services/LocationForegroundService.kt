@@ -13,8 +13,10 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
 import pl.latusikl.trackme.MainActivity
 import pl.latusikl.trackme.R
+import pl.latusikl.trackme.util.FileStore
 import pl.latusikl.trackme.util.SharedPreferenceUtil
 import pl.latusikl.trackme.util.toText
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -30,9 +32,9 @@ class LocationForegroundService : Service() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private var locationCallback: LocationCallback? = null
-    private var serverConnector : ServerConnector? = null
-
+    private var serverTask  : ServerTask? = null
     private lateinit var currentLocation: String
+    private lateinit var deviceId : String
 
     override fun onCreate() {
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -40,6 +42,7 @@ class LocationForegroundService : Service() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         locationRequest = prepareLocationRequest()
         currentLocation =  getString(R.string.location_unknown)
+        deviceId = FileStore.readDeviceIdFromFile()
 
     }
 
@@ -53,19 +56,21 @@ class LocationForegroundService : Service() {
     }
 
     private fun prepareLocationCallback(): LocationCallback {
+        runServerTask()
         return object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 super.onLocationResult(locationResult)
-
+                val date = Date()
                 currentLocation = if (locationResult?.lastLocation != null) {
+                    serverTask?.sendData(LocationMessageCreator.createMessage(deviceId,locationResult.lastLocation,date))
                     locationResult.lastLocation.toText()
-
                 } else {
+                    serverTask?.sendData(LocationMessageCreator.createNoLocationMessage(deviceId,date))
                     getString(R.string.location_unknown)
                 }
 
                 val intent = Intent(ACTION_FOREGROUND_ONLY_LOCATION_BROADCAST)
-                saveDataToSharedPreferences()
+                saveDataToSharedPreferences(date)
                 LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
 
                 if (serviceRunningInForeground) {
@@ -78,11 +83,16 @@ class LocationForegroundService : Service() {
         }
     }
 
-    private fun saveDataToSharedPreferences(){
+    private fun runServerTask() {
+        serverTask = ServerTask(FileStore.readPortFromFile(),FileStore.readIpFromFile(),deviceId)
+        serverTask!!.start()
+    }
+
+    private fun saveDataToSharedPreferences(date : Date){
         SharedPreferenceUtil.saveLastLocationValue(this, currentLocation)
         SharedPreferenceUtil.saveLocationTimeStamp(
             this,
-            SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(Date())
+            SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(date)
         )
     }
 
@@ -156,6 +166,7 @@ fun unsubscribeToLocationUpdates() {
         } catch (exception: SecurityException) {
             SharedPreferenceUtil.saveLocationTrackingPref(this, true)
         }
+        serverTask?.end()
     }
     else{
         SharedPreferenceUtil.saveLocationTrackingPref(this, false)

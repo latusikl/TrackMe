@@ -50,6 +50,7 @@
     <string name="no_location_text">No current location</string>
     <string name="server_connection_status">Server connection status</string>
     <string name="save_settings">Save settings</string>
+    <string name="set_server_settings">Add server settings first</string>
 
 
 </resources>

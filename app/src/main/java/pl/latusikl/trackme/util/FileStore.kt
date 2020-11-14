@@ -29,4 +29,14 @@ object FileStore {
     fun isDataFileCreated() : Boolean{
         return File(TrackMeApp.applicationContext().filesDir, fileName).exists()
     }
+
+    fun readPortFromFile() : Int = readFromFile().port.toInt()
+
+
+    fun readIpFromFile(): String = readFromFile().ipAddress
+
+
+    fun readDeviceIdFromFile(): String = readFromFile().deviceId
+
+    fun areSettingsReady() : Boolean = readDeviceIdFromFile() != "" && readIpFromFile() != ""
 }

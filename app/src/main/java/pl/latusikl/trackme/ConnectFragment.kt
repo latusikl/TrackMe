@@ -14,10 +14,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.snackbar.Snackbar
 import pl.latusikl.trackme.services.LocationForegroundService
+import pl.latusikl.trackme.util.FileStore
 import pl.latusikl.trackme.util.SharedPreferenceUtil
 
 class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
@@ -71,15 +73,20 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
                 SharedPreferenceUtil.KEY_FOREGROUND_ENABLED, false
             )
 
-            if (enabled) {
-                locationForegroundService?.unsubscribeToLocationUpdates()
-                //here add text change
-            } else {
-                if (foregroundPermissionApproved()) {
-                    locationForegroundService?.subscribeToLocationUpdates()
+            if(FileStore.areSettingsReady()) {
+                if (enabled) {
+                    locationForegroundService?.unsubscribeToLocationUpdates()
+                    //here add text change
                 } else {
-                    requestForegroundPermissions()
+                    if (foregroundPermissionApproved()) {
+                        locationForegroundService?.subscribeToLocationUpdates()
+                    } else {
+                        requestForegroundPermissions()
+                    }
                 }
+            }
+            else{
+                Toast.makeText(context, getText(R.string.set_server_settings), Toast.LENGTH_SHORT).show()
             }
         }
     }
