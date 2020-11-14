@@ -52,12 +52,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
-        android:text="Connection status"
+        android:text="@string/server_connection_status"
         android:textColor="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.053"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/last_send_input" />
+
 
     <TextView
         android:id="@+id/current_location_input"
@@ -65,13 +66,12 @@
         android:layout_height="29dp"
         android:background="@drawable/border"
         android:gravity="center"
-        android:text="50.105997, 18.973760"
+        android:text="@string/location_unknown"
         android:textIsSelectable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.271"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/current_location_label" />
-
 
     <TextView
         android:id="@+id/last_send_input"
@@ -79,7 +79,6 @@
         android:layout_height="29dp"
         android:background="@drawable/border"
         android:gravity="center"
-        android:text="20.10.2019 18:50"
         android:textIsSelectable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.271"
@@ -93,7 +92,6 @@
         android:layout_height="29dp"
         android:background="@drawable/border"
         android:gravity="center"
-        android:text="DISCONNECTED"
         app:layout_constraintBottom_toTopOf="@+id/connection_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.271"
@@ -106,7 +104,7 @@
         android:layout_width="237dp"
         android:layout_height="47dp"
         android:layout_marginBottom="56dp"
-        android:text="@string/connect_button"
+        android:text="@string/start_track_location_button_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

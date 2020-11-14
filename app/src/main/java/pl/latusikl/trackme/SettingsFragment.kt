@@ -76,13 +76,14 @@ class SettingsFragment : Fragment() {
 
     private fun convertSecondsToPosition(deviceIntervalSeconds : Int) : Int{
        return when(deviceIntervalSeconds){
-            60 -> 0
-            30 -> 1
-            120 -> 2
-            180 -> 3
-            240 -> 4
-            300 -> 5
-            else -> 0
+           15 -> 0
+           30 -> 1
+            60 -> 2
+            120 -> 3
+            180 -> 4
+            240 -> 5
+            300 -> 6
+            else -> 2
         }
     }
 
