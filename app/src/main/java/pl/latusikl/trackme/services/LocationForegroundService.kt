@@ -17,7 +17,6 @@ import pl.latusikl.trackme.util.ConnectionState
 import pl.latusikl.trackme.util.FileStore
 import pl.latusikl.trackme.util.SharedPreferenceUtil
 import pl.latusikl.trackme.util.toText
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -25,12 +24,12 @@ import java.util.concurrent.TimeUnit
 class LocationForegroundService : Service() {
 
     private var stateChange = false
-
     private var serviceRunningInForeground = false
 
     private val localBinder = LocalBinder()
     private lateinit var notificationManager: NotificationManager
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
     private var locationRequest: LocationRequest? = null
     private var locationCallback: LocationCallback? = null
     private var serverTask: ServerTask? = null
@@ -39,78 +38,9 @@ class LocationForegroundService : Service() {
 
     override fun onCreate() {
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         currentLocation = getString(R.string.location_unknown)
         deviceId = FileStore.readDeviceIdFromFile()
-
-    }
-
-    private fun prepareLocationRequest(): LocationRequest {
-        val intervalSaved = FileStore.readIntervalFromFile().toLong()
-        return LocationRequest().apply {
-            interval = TimeUnit.SECONDS.toMillis(intervalSaved)
-            fastestInterval = TimeUnit.SECONDS.toMillis(intervalSaved - 5)
-            maxWaitTime = TimeUnit.MINUTES.toMillis(2)
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-    }
-
-    private fun prepareLocationCallback(): LocationCallback {
-        runServerTask()
-        return object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                super.onLocationResult(locationResult)
-                val date = Date()
-                currentLocation = if (locationResult?.lastLocation != null) {
-                    serverTask?.sendData(
-                        LocationMessageCreator.createMessage(
-                            deviceId,
-                            locationResult.lastLocation,
-                            date
-                        )
-                    )
-                    locationResult.lastLocation.toText()
-                } else {
-                    serverTask?.sendData(
-                        LocationMessageCreator.createNoLocationMessage(
-                            deviceId,
-                            date
-                        )
-                    )
-                    getString(R.string.location_unknown)
-                }
-
-                val intent = Intent(ACTION_FOREGROUND_ONLY_LOCATION_BROADCAST)
-                saveDataToSharedPreferences(date)
-                intent.putExtra(EXTRA_STATUS, evaluateConnectionStateForIntent())
-                LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
-
-                if (serviceRunningInForeground) {
-                    notificationManager.notify(
-                        NOTIFICATION_ID,
-                        generateNotification(currentLocation)
-                    )
-                }
-            }
-        }
-    }
-
-    private fun evaluateConnectionStateForIntent(): ConnectionState {
-        return if (serverTask?.isConnected()!!) ConnectionState.CONNECTED else ConnectionState.CONNECTION_ERROR
-    }
-
-    private fun runServerTask() {
-        serverTask = ServerTask(FileStore.readPortFromFile(), FileStore.readIpFromFile(), deviceId)
-        serverTask!!.start()
-    }
-
-    private fun saveDataToSharedPreferences(date: Date) {
-        SharedPreferenceUtil.saveLastLocationValue(this, currentLocation)
-        SharedPreferenceUtil.saveLocationTimeStamp(
-            this,
-            SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(date)
-        )
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -141,12 +71,60 @@ class LocationForegroundService : Service() {
     }
 
     override fun onUnbind(intent: Intent): Boolean {
-        if (!stateChange && SharedPreferenceUtil.getLocationTrackingPref(this)) {
+        if (!stateChange && SharedPreferenceUtil.getLocationWorkModePref(this)) {
             val notification = generateNotification(currentLocation)
             startForeground(NOTIFICATION_ID, notification)
             serviceRunningInForeground = true
         }
         return true
+    }
+
+    private fun generateNotification(notificationText: String): Notification {
+
+        val titleText = getString(R.string.app_name)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID, titleText, NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+
+        val bigTextStyle = NotificationCompat.BigTextStyle()
+            .bigText(notificationText)
+            .setBigContentTitle(titleText)
+
+        val launchActivityIntent = Intent(this, MainActivity::class.java)
+
+        val cancelIntent = Intent(this, LocationForegroundService::class.java)
+        cancelIntent.putExtra(EXTRA_CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION, true)
+
+        val servicePendingIntent = PendingIntent.getService(
+            this, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val activityPendingIntent = PendingIntent.getActivity(
+            this, 0, launchActivityIntent, 0
+        )
+        val notificationCompatBuilder =
+            NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
+
+        return notificationCompatBuilder
+            .setStyle(bigTextStyle)
+            .setContentTitle(titleText)
+            .setContentText(notificationText)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setOngoing(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .addAction(
+                R.drawable.ic_baseline_play_circle_outline_24, getString(R.string.back_to_app),
+                activityPendingIntent
+            )
+            .addAction(
+                R.drawable.ic_baseline_play_circle_outline_24,
+                getString(R.string.stop_track_location_button_text),
+                servicePendingIntent
+            )
+            .build()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -156,12 +134,10 @@ class LocationForegroundService : Service() {
 
     fun subscribeToLocationUpdates() {
         SharedPreferenceUtil.saveLocationTrackingPref(this, true)
-
         startService(Intent(applicationContext, LocationForegroundService::class.java))
-        locationRequest = prepareLocationRequest()
+        this.locationRequest = prepareLocationRequest()
         try {
-
-            this.locationCallback = prepareLocationCallback()
+            this.locationCallback = prepareLocationCallbackAndStartServerTask()
             fusedLocationProviderClient.requestLocationUpdates(
                 locationRequest, locationCallback, Looper.myLooper()
             )
@@ -169,6 +145,97 @@ class LocationForegroundService : Service() {
             SharedPreferenceUtil.saveLocationTrackingPref(this, false)
         }
     }
+
+    private fun prepareLocationRequest(): LocationRequest {
+        val intervalSaved = FileStore.readIntervalFromFile().toLong()
+        return LocationRequest().apply {
+            interval = TimeUnit.SECONDS.toMillis(intervalSaved)
+            fastestInterval = TimeUnit.SECONDS.toMillis(intervalSaved - 2)
+            maxWaitTime = TimeUnit.SECONDS.toMillis(intervalSaved + 2)
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+    }
+
+    private fun prepareLocationCallbackAndStartServerTask(): LocationCallback {
+        runServerTask()
+        return object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                super.onLocationResult(locationResult)
+                val connectionStateValue = evaluateConnectionStateForIntent()
+                val date = Date()
+
+
+                sendLocationMessage(locationResult, date, connectionStateValue)
+                updateLocationInfoAndServerState(
+                    date,
+                    currentLocation,
+                    connectionStateValue
+                )
+                val intent = Intent(ACTION_LOCATION_FETCHED)
+                LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
+
+                if (serviceRunningInForeground) {
+                    val notificationText = if (connectionStateValue == ConnectionState.CONNECTED) {
+                        currentLocation
+                    } else {
+                        getString(R.string.server_connection_unable)
+                    }
+                    notificationManager.notify(
+                        NOTIFICATION_ID,
+                        generateNotification(notificationText)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun runServerTask() {
+        serverTask = ServerTask(FileStore.readPortFromFile(), FileStore.readIpFromFile(), deviceId)
+        serverTask!!.start()
+    }
+
+    private fun sendLocationMessage(
+        locationResult: LocationResult?,
+        date: Date,
+        connectionState: ConnectionState
+    ) {
+        currentLocation = if (locationResult?.lastLocation != null) {
+            if (connectionState == ConnectionState.CONNECTED) {
+                serverTask?.sendData(
+                    LocationMessageCreator.createMessage(
+                        deviceId,
+                        locationResult.lastLocation,
+                        date
+                    )
+                )
+            }
+            locationResult.lastLocation.toText()
+        } else {
+            if (connectionState == ConnectionState.CONNECTED) {
+                serverTask?.sendData(
+                    LocationMessageCreator.createNoLocationMessage(
+                        deviceId,
+                        date
+                    )
+                )
+            }
+            getString(R.string.location_unknown)
+        }
+    }
+
+    private fun updateLocationInfoAndServerState(
+        date: Date,
+        currentLocation: String,
+        connectionState: ConnectionState
+    ) {
+        SharedPreferenceUtil.saveServerStateValue(this, connectionState.name)
+        SharedPreferenceUtil.saveLastLocationValue(this, currentLocation)
+        SharedPreferenceUtil.saveLocationTimeStamp(
+            this,
+            SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(date)
+        )
+    }
+
 
     fun unsubscribeToLocationUpdates() {
         if (locationCallback != null) {
@@ -191,59 +258,10 @@ class LocationForegroundService : Service() {
         }
     }
 
-    private fun generateNotification(location: String): Notification {
 
-        val titleText = getString(R.string.app_name)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-            val notificationChannel = NotificationChannel(
-                NOTIFICATION_CHANNEL_ID, titleText, NotificationManager.IMPORTANCE_DEFAULT
-            )
-
-            notificationManager.createNotificationChannel(notificationChannel)
-        }
-
-        val bigTextStyle = NotificationCompat.BigTextStyle()
-            .bigText(location)
-            .setBigContentTitle(titleText)
-
-        val launchActivityIntent = Intent(this, MainActivity::class.java)
-
-        val cancelIntent = Intent(this, LocationForegroundService::class.java)
-        cancelIntent.putExtra(EXTRA_CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION, true)
-
-        val servicePendingIntent = PendingIntent.getService(
-            this, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        val activityPendingIntent = PendingIntent.getActivity(
-            this, 0, launchActivityIntent, 0
-        )
-
-        val notificationCompatBuilder =
-            NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-
-        return notificationCompatBuilder
-            .setStyle(bigTextStyle)
-            .setContentTitle(titleText)
-            .setContentText(location)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setOngoing(true)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .addAction(
-                R.drawable.ic_baseline_play_circle_outline_24, getString(R.string.back_to_app),
-                activityPendingIntent
-            )
-            .addAction(
-                R.drawable.ic_baseline_play_circle_outline_24,
-                getString(R.string.stop_track_location_button_text),
-                servicePendingIntent
-            )
-            .build()
+    private fun evaluateConnectionStateForIntent(): ConnectionState {
+        return if (serverTask?.isConnected()!!) ConnectionState.CONNECTED else ConnectionState.CONNECTION_ERROR
     }
-
 
     inner class LocalBinder : Binder() {
         internal val onlyLocationForegroundService: LocationForegroundService
@@ -253,9 +271,8 @@ class LocationForegroundService : Service() {
     companion object {
 
         private const val PACKAGE_NAME = "pl.latusikl.trackme"
-        internal const val ACTION_FOREGROUND_ONLY_LOCATION_BROADCAST =
-            "$PACKAGE_NAME.action.FOREGROUND_ONLY_LOCATION_BROADCAST"
-        internal const val EXTRA_STATUS = "$PACKAGE_NAME.EXTRA.STATUS"
+        internal const val ACTION_LOCATION_FETCHED =
+            "$PACKAGE_NAME.action.LOCATION_FETCHED"
         private const val EXTRA_CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION =
             "$PACKAGE_NAME.extra.CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION"
         private const val NOTIFICATION_ID = 1

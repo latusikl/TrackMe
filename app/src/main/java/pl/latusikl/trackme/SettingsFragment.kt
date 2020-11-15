@@ -56,13 +56,13 @@ class SettingsFragment : Fragment() {
                     FileStore.readFromFile()
                 )
                 FileStore.writeToFile(modifiedData)
-                showToast("Settings updated.")
+                showToast(getString(R.string.settings_update_toast))
             } else if (!isPortValid && !isIpValid) {
-                showToast("IP address and port are invalid.")
+                showToast(getString(R.string.invalid_ip_port_toast))
             } else if (!isPortValid) {
-                showToast("Port value is invalid.")
+                showToast(getString(R.string.invalid_port_toast))
             } else {
-                showToast("IP address is invalid.")
+                showToast(getString(R.string.invalid_ip_toast))
             }
         }
     }
@@ -71,13 +71,14 @@ class SettingsFragment : Fragment() {
         val currentAppData = FileStore.readFromFile()
         view.findViewById<EditText>(R.id.serverIpInput).setText(currentAppData.ipAddress)
         view.findViewById<EditText>(R.id.serverPortInput).setText(currentAppData.port)
-        view.findViewById<Spinner>(R.id.intervalSpinner).setSelection(convertSecondsToPosition(currentAppData.sendingIntervalSeconds))
+        view.findViewById<Spinner>(R.id.intervalSpinner)
+            .setSelection(convertSecondsToPosition(currentAppData.sendingIntervalSeconds))
     }
 
-    private fun convertSecondsToPosition(deviceIntervalSeconds : Int) : Int{
-       return when(deviceIntervalSeconds){
-           15 -> 0
-           30 -> 1
+    private fun convertSecondsToPosition(deviceIntervalSeconds: Int): Int {
+        return when (deviceIntervalSeconds) {
+            15 -> 0
+            30 -> 1
             60 -> 2
             120 -> 3
             180 -> 4
@@ -109,8 +110,12 @@ class SettingsFragment : Fragment() {
     }
 
     private fun extractIntervalFromStringAsSeconds(intervalInput: String): Int {
-        println((intervalInput.substring(0, intervalInput.length - INTERVAL_SUFFIX_LENGTH).toDouble() * 60).toInt())
-        return (intervalInput.substring(0, intervalInput.length - INTERVAL_SUFFIX_LENGTH).toDouble() * 60).toInt()
+        println(
+            (intervalInput.substring(0, intervalInput.length - INTERVAL_SUFFIX_LENGTH)
+                .toDouble() * 60).toInt()
+        )
+        return (intervalInput.substring(0, intervalInput.length - INTERVAL_SUFFIX_LENGTH)
+            .toDouble() * 60).toInt()
     }
 
     private fun isIpAddressValid(ipAddress: String): Boolean {

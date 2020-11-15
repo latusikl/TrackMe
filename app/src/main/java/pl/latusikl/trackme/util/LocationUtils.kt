@@ -35,7 +35,7 @@ internal object SharedPreferenceUtil {
     const val KEY_FOREGROUND_ENABLED = "tracking_foreground_location"
     const val KEY_LAST_SEND_DATE = "tracking_foreground_timestamp"
     const val KEY_LAST_LOCATION = "tracking_last_location"
-
+    const val KEY_SERVER_STATE = "tracking_ server_state"
 
     fun saveLastLocationValue(context: Context, location: String) =
         context.getSharedPreferences(
@@ -50,6 +50,21 @@ internal object SharedPreferenceUtil {
             Context.MODE_PRIVATE
         )
             .getString(KEY_LAST_LOCATION, context.getString(R.string.location_unknown)).toString()
+
+
+    fun saveServerStateValue(context: Context, serverState: String) =
+        context.getSharedPreferences(
+            context.getString(R.string.preference_file_key), Context.MODE_PRIVATE
+        ).edit {
+            putString(KEY_SERVER_STATE, serverState)
+        }
+
+    fun getServerStateValue(context: Context): String =
+        context.getSharedPreferences(
+            context.getString(R.string.preference_file_key),
+            Context.MODE_PRIVATE
+        )
+            .getString(KEY_SERVER_STATE, context.getString(R.string.location_unknown)).toString()
 
 
     fun saveLocationTimeStamp(context: Context, timeStamp: String) =
@@ -67,7 +82,7 @@ internal object SharedPreferenceUtil {
             .getString(KEY_LAST_SEND_DATE, "").toString()
 
 
-    fun getLocationTrackingPref(context: Context): Boolean =
+    fun getLocationWorkModePref(context: Context): Boolean =
         context.getSharedPreferences(
             context.getString(R.string.preference_file_key), Context.MODE_PRIVATE
         )

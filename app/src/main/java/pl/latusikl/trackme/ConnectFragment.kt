@@ -64,13 +64,16 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
         this.locationLastInputTextView = view.findViewById(R.id.last_send_input)
         this.connectionStatusTextView = view.findViewById(R.id.connection_status_input)
         foregroundOnlyBroadcastReceiver = ForegroundOnlyBroadcastReceiver()
-
         sharedPreferences =
             requireActivity().getSharedPreferences(
                 getString(R.string.preference_file_key),
                 Context.MODE_PRIVATE
             )
+        clearUi()
+        addButtonListener()
+    }
 
+    private fun addButtonListener() {
         connectButton.setOnClickListener {
             val enabled = sharedPreferences.getBoolean(
                 SharedPreferenceUtil.KEY_FOREGROUND_ENABLED, false
@@ -79,10 +82,12 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
             if (FileStore.areSettingsReady()) {
                 if (enabled) {
                     locationForegroundService?.unsubscribeToLocationUpdates()
+                    clearUi()
                     //here add text change
                 } else {
                     if (foregroundPermissionApproved()) {
-                        this.connectionStatusTextView.text = ""
+                        clearUi()
+                        locationInputTextView.text = getString(R.string.location_wait_info)
                         locationForegroundService?.subscribeToLocationUpdates()
                     } else {
                         requestForegroundPermissions()
@@ -93,6 +98,12 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
                     .show()
             }
         }
+    }
+
+    private fun clearUi() {
+        locationInputTextView.text = ""
+        locationLastInputTextView.text = ""
+        connectionStatusTextView.text = ""
     }
 
     private fun foregroundPermissionApproved(): Boolean {
@@ -119,12 +130,12 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
     }
 
     override fun onResume() {
-        //add refreshe
         super.onResume()
+        updateUiValues()
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
             foregroundOnlyBroadcastReceiver,
             IntentFilter(
-                LocationForegroundService.ACTION_FOREGROUND_ONLY_LOCATION_BROADCAST
+                LocationForegroundService.ACTION_LOCATION_FETCHED
             )
         )
     }
@@ -147,12 +158,12 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        if (key == SharedPreferenceUtil.KEY_FOREGROUND_ENABLED) {
-            updateButtonState(
-                sharedPreferences.getBoolean(
-                    SharedPreferenceUtil.KEY_FOREGROUND_ENABLED, false
+        when (key) {
+            SharedPreferenceUtil.KEY_FOREGROUND_ENABLED -> {
+                updateButtonState(
+                    SharedPreferenceUtil.getLocationWorkModePref(requireContext())
                 )
-            )
+            }
         }
     }
 
@@ -229,33 +240,35 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
         }
     }
 
-
     private inner class ForegroundOnlyBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val connectionState = intent.getSerializableExtra(
-                LocationForegroundService.EXTRA_STATUS
-            ) as ConnectionState
-            when (connectionState) {
-                ConnectionState.CONNECTED -> updateUiValues("Connected to server")
-                else -> {
-                    locationForegroundService?.unsubscribeToLocationUpdates(); updateUiValues("Unable to connect")
-                }
-            }
+            updateUiValues()
         }
     }
 
-    private fun updateUiValues(connectionStatus: String) {
-        val location = SharedPreferenceUtil.getLastLocationValue(requireContext())
-        val dateTime = SharedPreferenceUtil.getLastLocationTimeStamp(requireContext())
-        logResultsToScreen(location, dateTime, connectionStatus)
+    private fun updateUiValues() {
+        val enabled = sharedPreferences.getBoolean(
+            SharedPreferenceUtil.KEY_FOREGROUND_ENABLED, false
+        )
+        if (enabled) {
+            locationInputTextView.text = SharedPreferenceUtil.getLastLocationValue(requireContext())
+            locationLastInputTextView.text =
+                SharedPreferenceUtil.getLastLocationTimeStamp(requireContext())
+            connectionStatusTextView.text =
+                parseStateToMessage(SharedPreferenceUtil.getServerStateValue(requireContext()))
+        } else {
+            clearUi()
+        }
     }
 
-    private fun logResultsToScreen(location: String, dateTime: String, connectionStatus: String) {
-        locationInputTextView.text = location
-        locationLastInputTextView.text = dateTime
-        connectionStatusTextView.text = connectionStatus
+    private fun parseStateToMessage(connectionState: String): String {
+        return when (ConnectionState.valueOf(connectionState)) {
+            ConnectionState.CONNECTED -> getString(R.string.server_connection_ok)
+            else -> {
+                getString(R.string.server_connection_unable)
+            }
+        }
     }
-
 
     companion object {
         private const val FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 34

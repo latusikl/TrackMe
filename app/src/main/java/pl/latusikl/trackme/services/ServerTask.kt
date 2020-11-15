@@ -4,71 +4,65 @@ import android.util.Log
 import java.net.ConnectException
 
 
-class ServerTask(val port : Int, val ipAddress: String, val deviceId : String) : Thread("ServerTask") {
-    @Volatile
-    private var shouldEnd = false
+class ServerTask(val port: Int, val ipAddress: String, val deviceId: String) :
+    Thread("ServerTask") {
+
+    private var serverConnector: ServerConnector? = null
 
     @Volatile
-    private var newData = false
+    private var shouldThreadEnd = false
 
     @Volatile
-    private var message = ""
+    private var isNewData = false
 
-    private var isLogged = false
+    @Volatile
+    private var messageToSend = ""
 
-    private var serverConnector : ServerConnector? = null
-
+    private var isLoginMessageSendWithSuccess = false
     private var isConnectionException = false
-
 
     override fun run() {
         createServerConnectorIfNotExists()
         logDeviceIfNotLogged()
-        while (!shouldEnd) {
-            if (newData) {
-                Log.e("ServerThread", message)
-                if(isConnected()){
-                    serverConnector?.sendMessages(message)
+        while (!shouldThreadEnd) {
+            if (isNewData) {
+                Log.e("ServerThread", messageToSend)
+                if (isConnected()) {
+                    serverConnector?.sendMessages(messageToSend)
                 }
-                newData = false
+                isNewData = false
             }
         }
     }
 
-    private fun createServerConnectorIfNotExists(){
-        if(serverConnector == null){
-            try{
-                serverConnector = ServerConnector(port,ipAddress)
+    private fun createServerConnectorIfNotExists() {
+        if (serverConnector == null) {
+            try {
+                serverConnector = ServerConnector(port, ipAddress)
+            } catch (exception: ConnectException) {
+                isConnectionException = true
             }
-           catch (exception : ConnectException){
-               isConnectionException = true
-           }
         }
     }
 
-    private fun logDeviceIfNotLogged(){
-        if(isConnected() && !isLogged){
-            sendRegisterMessage()
-            this.isLogged = true;
+    private fun logDeviceIfNotLogged() {
+        if (isConnected() && !isLoginMessageSendWithSuccess) {
+            serverConnector?.sendMessages(LocationMessageCreator.createStartMessage(deviceId))
+            this.isLoginMessageSendWithSuccess = true
         }
-    }
-
-    private fun sendRegisterMessage(){
-        serverConnector?.sendMessages(LocationMessageCreator.createStartMessage(deviceId))
-        this.isLogged=true;
     }
 
     fun sendData(message: String) {
-        this.message = message;
-        newData = true
+        this.messageToSend = message;
+        isNewData = true
     }
 
     fun end() {
         serverConnector?.close()
-        this.shouldEnd = true
+        this.shouldThreadEnd = true
     }
 
-    fun isConnected() : Boolean{
+    fun isConnected(): Boolean {
         return !isConnectionException && serverConnector?.isConnected() ?: false
     }
 }

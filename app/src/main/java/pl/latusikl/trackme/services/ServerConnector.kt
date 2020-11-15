@@ -5,11 +5,10 @@ import java.net.Socket
 
 class ServerConnector(portNumber: Int, ipAddress: String) : AutoCloseable {
 
-    private val socket: Socket
+    private val socket: Socket = Socket(ipAddress, portNumber)
     private val output: PrintWriter
 
     init {
-        socket = Socket(ipAddress, portNumber)
         output = PrintWriter(socket.getOutputStream(), true)
     }
 
@@ -21,8 +20,7 @@ class ServerConnector(portNumber: Int, ipAddress: String) : AutoCloseable {
         socket.close()
     }
 
-    fun isConnected() : Boolean{
+    fun isConnected(): Boolean {
         return socket.isConnected && !output.checkError()
     }
-
 }
