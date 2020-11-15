@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.snackbar.Snackbar
 import pl.latusikl.trackme.services.LocationForegroundService
+import pl.latusikl.trackme.util.ConnectionState
 import pl.latusikl.trackme.util.FileStore
 import pl.latusikl.trackme.util.SharedPreferenceUtil
 
@@ -33,6 +34,7 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
     private lateinit var connectButton: Button
     private lateinit var locationInputTextView: TextView
     private lateinit var locationLastInputTextView: TextView
+    private lateinit var connectionStatusTextView: TextView
 
     private val foregroundOnlyServiceConnection = object : ServiceConnection {
 
@@ -60,6 +62,7 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
         this.locationInputTextView = view.findViewById(R.id.current_location_input)
         this.connectButton = view.findViewById(R.id.connection_button)
         this.locationLastInputTextView = view.findViewById(R.id.last_send_input)
+        this.connectionStatusTextView = view.findViewById(R.id.connection_status_input)
         foregroundOnlyBroadcastReceiver = ForegroundOnlyBroadcastReceiver()
 
         sharedPreferences =
@@ -73,20 +76,21 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
                 SharedPreferenceUtil.KEY_FOREGROUND_ENABLED, false
             )
 
-            if(FileStore.areSettingsReady()) {
+            if (FileStore.areSettingsReady()) {
                 if (enabled) {
                     locationForegroundService?.unsubscribeToLocationUpdates()
                     //here add text change
                 } else {
                     if (foregroundPermissionApproved()) {
+                        this.connectionStatusTextView.text = ""
                         locationForegroundService?.subscribeToLocationUpdates()
                     } else {
                         requestForegroundPermissions()
                     }
                 }
-            }
-            else{
-                Toast.makeText(context, getText(R.string.set_server_settings), Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, getText(R.string.set_server_settings), Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -228,19 +232,28 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
 
     private inner class ForegroundOnlyBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            updateUiValues()
+            val connectionState = intent.getSerializableExtra(
+                LocationForegroundService.EXTRA_STATUS
+            ) as ConnectionState
+            when (connectionState) {
+                ConnectionState.CONNECTED -> updateUiValues("Connected to server")
+                else -> {
+                    locationForegroundService?.unsubscribeToLocationUpdates(); updateUiValues("Unable to connect")
+                }
+            }
         }
     }
 
-    private fun updateUiValues() {
+    private fun updateUiValues(connectionStatus: String) {
         val location = SharedPreferenceUtil.getLastLocationValue(requireContext())
         val dateTime = SharedPreferenceUtil.getLastLocationTimeStamp(requireContext())
-        logResultsToScreen(location, dateTime)
+        logResultsToScreen(location, dateTime, connectionStatus)
     }
 
-    private fun logResultsToScreen(location: String, dateTime: String) {
+    private fun logResultsToScreen(location: String, dateTime: String, connectionStatus: String) {
         locationInputTextView.text = location
         locationLastInputTextView.text = dateTime
+        connectionStatusTextView.text = connectionStatus
     }
 
 
