@@ -167,26 +167,25 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
         }
     }
 
+
     private fun requestForegroundPermissions() {
         val provideRationale = foregroundPermissionApproved()
 
         if (provideRationale) {
             Snackbar.make(
-                requireView().findViewById(R.id.ConnectFragment),
+                requireActivity().findViewById(android.R.id.content),
                 R.string.permission_rationale,
                 Snackbar.LENGTH_LONG
             )
                 .setAction(R.string.ok) {
-                    ActivityCompat.requestPermissions(
-                        requireActivity(),
+                   requestPermissions(
                         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                         FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
                     )
                 }
                 .show()
         } else {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
+            requestPermissions(
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
             )
@@ -198,6 +197,7 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
         permissions: Array<String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE -> when {
                 grantResults.isEmpty() ->
@@ -210,7 +210,7 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
                     updateButtonState(false)
 
                     Snackbar.make(
-                        requireView().findViewById(R.id.ConnectFragment),
+                        requireActivity().findViewById(android.R.id.content),
                         R.string.permission_denied_explanation,
                         Snackbar.LENGTH_LONG
                     )
