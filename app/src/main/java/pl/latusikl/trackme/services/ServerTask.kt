@@ -1,6 +1,7 @@
 package pl.latusikl.trackme.services
 
 import android.util.Log
+import pl.latusikl.trackme.util.LocationMessageCreator
 import java.net.ConnectException
 
 

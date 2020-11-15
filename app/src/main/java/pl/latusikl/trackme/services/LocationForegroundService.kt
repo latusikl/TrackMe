@@ -13,10 +13,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
 import pl.latusikl.trackme.MainActivity
 import pl.latusikl.trackme.R
-import pl.latusikl.trackme.util.ConnectionState
-import pl.latusikl.trackme.util.FileStore
+import pl.latusikl.trackme.util.*
 import pl.latusikl.trackme.util.SharedPreferenceUtil
-import pl.latusikl.trackme.util.toText
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
