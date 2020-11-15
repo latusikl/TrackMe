@@ -51,7 +51,7 @@
     <string name="server_connection_status">Server connection status</string>
     <string name="save_settings">Save settings</string>
     <string name="set_server_settings">Add server settings first</string>
-    <string name="server_connection_unable">Unable to establish server connection. Try restart process or change settings.</string>
+    <string name="server_connection_unable">Unable to establish server connection. Trying to reestablish connection.</string>
     <string name="server_connection_ok">Connected to server</string>
     <string name="settings_update_toast">Settings saved. Restart connection.</string>
     <string name="invalid_ip_port_toast">IP address and port are invalid.</string>

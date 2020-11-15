@@ -1,7 +1,6 @@
 package pl.latusikl.trackme.util
 
 import android.content.Context
-import android.support.v4.app.INotificationSideChannel
 import pl.latusikl.trackme.TrackMeApp
 import pl.latusikl.trackme.models.AppData
 import java.io.File
@@ -27,11 +26,11 @@ object FileStore {
             .use { fileInputStream -> ObjectInputStream(fileInputStream).readObject() as AppData }
     }
 
-    fun isDataFileCreated() : Boolean{
+    fun isDataFileCreated(): Boolean {
         return File(TrackMeApp.applicationContext().filesDir, fileName).exists()
     }
 
-    fun readPortFromFile() : Int = readFromFile().port.toInt()
+    fun readPortFromFile(): Int = readFromFile().port.toInt()
 
 
     fun readIpFromFile(): String = readFromFile().ipAddress
@@ -39,7 +38,7 @@ object FileStore {
 
     fun readDeviceIdFromFile(): String = readFromFile().deviceId
 
-    fun areSettingsReady() : Boolean = readDeviceIdFromFile() != "" && readIpFromFile() != ""
+    fun areSettingsReady(): Boolean = readDeviceIdFromFile() != "" && readIpFromFile() != ""
 
-    fun readIntervalFromFile() : Int = readFromFile().sendingIntervalSeconds
+    fun readIntervalFromFile(): Int = readFromFile().sendingIntervalSeconds
 }

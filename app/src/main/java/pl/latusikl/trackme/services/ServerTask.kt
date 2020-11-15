@@ -18,17 +18,21 @@ class ServerTask(val port: Int, val ipAddress: String, val deviceId: String) :
     @Volatile
     private var messageToSend = ""
 
-    private var isLoginMessageSendWithSuccess = false
     private var isConnectionException = false
 
     override fun run() {
         createServerConnectorIfNotExists()
-        logDeviceIfNotLogged()
+        sendLoggingMessage()
         while (!shouldThreadEnd) {
             if (isNewData) {
-                Log.e("ServerThread", messageToSend)
+                Log.d("ServerThread", messageToSend)
                 if (isConnected()) {
                     serverConnector?.sendMessages(messageToSend)
+                } else {
+                    tryToReconnect()
+                    if (isConnected()) {
+                        serverConnector?.sendMessages(messageToSend)
+                    }
                 }
                 isNewData = false
             }
@@ -39,16 +43,23 @@ class ServerTask(val port: Int, val ipAddress: String, val deviceId: String) :
         if (serverConnector == null) {
             try {
                 serverConnector = ServerConnector(port, ipAddress)
+                isConnectionException = false
             } catch (exception: ConnectException) {
                 isConnectionException = true
             }
         }
     }
 
-    private fun logDeviceIfNotLogged() {
-        if (isConnected() && !isLoginMessageSendWithSuccess) {
+    private fun tryToReconnect() {
+        serverConnector?.close()
+        serverConnector = null
+        createServerConnectorIfNotExists()
+        sendLoggingMessage()
+    }
+
+    private fun sendLoggingMessage() {
+        if (isConnected()) {
             serverConnector?.sendMessages(LocationMessageCreator.createStartMessage(deviceId))
-            this.isLoginMessageSendWithSuccess = true
         }
     }
 

@@ -165,7 +165,7 @@ class LocationForegroundService : Service() {
                 val date = Date()
 
 
-                sendLocationMessage(locationResult, date, connectionStateValue)
+                sendLocationMessage(locationResult, date)
                 updateLocationInfoAndServerState(
                     date,
                     currentLocation,
@@ -196,29 +196,28 @@ class LocationForegroundService : Service() {
 
     private fun sendLocationMessage(
         locationResult: LocationResult?,
-        date: Date,
-        connectionState: ConnectionState
+        date: Date
     ) {
         currentLocation = if (locationResult?.lastLocation != null) {
-            if (connectionState == ConnectionState.CONNECTED) {
-                serverTask?.sendData(
-                    LocationMessageCreator.createMessage(
-                        deviceId,
-                        locationResult.lastLocation,
-                        date
-                    )
+
+            serverTask?.sendData(
+                LocationMessageCreator.createMessage(
+                    deviceId,
+                    locationResult.lastLocation,
+                    date
                 )
-            }
+            )
+
             locationResult.lastLocation.toText()
         } else {
-            if (connectionState == ConnectionState.CONNECTED) {
-                serverTask?.sendData(
-                    LocationMessageCreator.createNoLocationMessage(
-                        deviceId,
-                        date
-                    )
+
+            serverTask?.sendData(
+                LocationMessageCreator.createNoLocationMessage(
+                    deviceId,
+                    date
                 )
-            }
+            )
+
             getString(R.string.location_unknown)
         }
     }
