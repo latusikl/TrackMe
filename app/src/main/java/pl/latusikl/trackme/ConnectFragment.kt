@@ -262,8 +262,8 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
     }
 
     private fun parseStateToMessage(connectionState: String): String {
-        return when (ConnectionState.valueOf(connectionState)) {
-            ConnectionState.CONNECTED -> getString(R.string.server_connection_ok)
+        return when (connectionState) {
+            ConnectionState.CONNECTED.name -> getString(R.string.server_connection_ok)
             else -> {
                 getString(R.string.server_connection_unable)
             }
