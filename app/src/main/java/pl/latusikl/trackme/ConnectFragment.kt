@@ -83,7 +83,6 @@ class ConnectFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeLi
                 if (enabled) {
                     locationForegroundService?.unsubscribeToLocationUpdates()
                     clearUi()
-                    //here add text change
                 } else {
                     if (foregroundPermissionApproved()) {
                         clearUi()
